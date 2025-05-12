@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\begin{document}
+\title{Summary: Batch Normalization}
+\author{Your Name}
+\date{May 2025}
+\maketitle
+
+\section{Overview}
+Ioffe and Szegedy (2015) propose batch normalization (BN) to accelerate deep network training by reducing internal covariate shift. BN normalizes layer inputs over mini-batches, adding learnable scale and shift parameters.
+
+\section{Mathematical Formulation}
+For a mini-batch $\mathcal{B} = \{x_1, \dots, x_m\}$ at layer $l$, compute:
+\[
+\mu_\mathcal{B} = \frac{1}{m} \sum_{i=1}^m x_i, \quad \sigma_\mathcal{B}^2 = \frac{1}{m} \sum_{i=1}^m (x_i - \mu_\mathcal{B})^2.
+\]
+Normalize:
+\[
+\hat{x}_i = \frac{x_i - \mu_\mathcal{B}}{\sqrt{\sigma_\mathcal{B}^2 + \epsilon}},
+\]
+where $\epsilon$ prevents division by zero. Apply learnable parameters $\gamma, \beta$:
+\[
+y_i = \gamma \hat{x}_i + \beta.
+\]
+At inference, use running averages of $\mu$ and $\sigma^2$.
+
+\section{Method}
+BN is applied before non-linearities (e.g., ReLU). It reduces sensitivity to initialization and enables higher learning rates, improving training stability.
+
+\section{Critique}
+BN excels in large-batch settings but struggles with small batches, common in finance ML due to limited high-quality data. Alternatives like layer normalization may suit sequential models (e.g., transformers).
+
+\end{document}
