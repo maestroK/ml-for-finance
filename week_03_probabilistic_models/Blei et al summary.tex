@@ -1,0 +1,167 @@
+% Setting up a comprehensive preamble for a standalone document
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\usepackage{microtype}
+% Configuring font last, using Computer Modern as default
+\usepackage{lmodern}
+
+% Title and author
+\title{Summary of ``Variational Inference: A Review for Statisticians'' by Blei et al. (2017)}
+\author{Abdul Samad Khan}
+\date{May 2025}
+
+\begin{document}
+
+\maketitle
+
+% Introducing variational inference
+\section{Introduction}
+David M. Blei, Alp Kucukelbir, and Jon D. McAuliffe’s paper, published in the \textit{Journal of the American Statistical Association} (2017), provides a comprehensive review of variational inference (VI), a machine learning method for approximating intractable posterior distributions in Bayesian statistics. Unlike Markov Chain Monte Carlo (MCMC), VI transforms inference into an optimization problem, offering speed and scalability for large datasets. This summary extracts the paper’s essence for machine learning practitioners, emphasizing mathematical rigor and practical utility. \href{https://doi.org/10.1080/01621459.2017.1285773}{[Source]}
+
+% Core concepts of VI
+\section{Core Concepts}
+VI addresses the challenge of computing posterior distributions $p(\mathbf{z} \mid \mathbf{x})$ in Bayesian models, where $\mathbf{x}$ is observed data and $\mathbf{z}$ represents latent variables or parameters. Exact computation is often infeasible due to the normalizing constant in Bayes’ theorem:
+\[
+p(\mathbf{z} \mid \mathbf{x}) = \frac{p(\mathbf{x}, \mathbf{z})}{p(\mathbf{x})}, \quad p(\mathbf{x}) = \int p(\mathbf{x}, \mathbf{z}) \, d\mathbf{z}.
+\]
+VI approximates the posterior by positing a family of simpler distributions $q(\mathbf{z}; \boldsymbol{\theta})$ and optimizing to find the member closest to $p(\mathbf{z} \mid \mathbf{x})$. Closeness is measured via Kullback-Leibler (KL) divergence:
+\[
+D_{\text{KL}}(q \parallel p) = \mathbb{E}_{q} \left[ \log \frac{q(\mathbf{z}; \boldsymbol{\theta})}{p(\mathbf{z} \mid \mathbf{x})} \right].
+\]
+Minimizing this divergence is equivalent to maximizing the Evidence Lower Bound (ELBO):
+\[
+\text{ELBO}(\boldsymbol{\theta}) = \mathbb{E}_{q} [\log p(\mathbf{x}, \mathbf{z})] - \mathbb{E}_{q} [\log q(\mathbf{z}; \boldsymbol{\theta})].
+\]
+The ELBO is tractable and serves as the optimization objective.
+
+% Mean-field variational inference
+\section{Mean-Field Variational Inference}
+The paper emphasizes mean-field VI, where $q(\mathbf{z}; \boldsymbol{\theta})$ factorizes over latent variables:
+\[
+q(\mathbf{z}; \boldsymbol{\theta}) = \prod_{i=1}^m q(z_i; \theta_i).
+\]
+This assumption simplifies computations but may limit expressiveness. The optimization proceeds via coordinate ascent, iteratively updating each $q(z_i)$ while holding others fixed, converging to a local optimum. For exponential family models, updates often have closed-form solutions, enhancing efficiency.
+
+% Practical example
+\section{Example: Bayesian Mixture of Gaussians}
+The paper illustrates VI with a Bayesian mixture of Gaussians, where data points are generated from a mixture of $K$ Gaussian components with unknown means and variances. The variational distribution factorizes over cluster assignments and parameters, and the ELBO is optimized to approximate the posterior. This example demonstrates VI’s ability to handle complex models with tractable computations.
+
+% Stochastic variational inference
+\section{Stochastic Variational Inference}
+To scale VI to massive datasets, the paper introduces stochastic variational inference (SVI), which uses stochastic gradient descent to optimize the ELBO. By subsampling data, SVI reduces computational cost, making VI feasible for applications like topic modeling on millions of documents (e.g., 3.8M Wikipedia articles). SVI retains VI’s speed while approaching MCMC’s accuracy for large-scale problems.
+
+% Implications for machine learning
+\section{Implications for Machine Learning}
+VI’s optimization-based approach makes it faster than MCMC, particularly for high-dimensional models in deep learning (e.g., variational autoencoders) and Bayesian neural networks. However, the mean-field assumption can underestimate posterior variance, and VI’s local optima may require careful initialization. The paper highlights open problems, such as improving variational family expressiveness and handling nonconjugate models, which are relevant for your quantum machine learning and finance projects.
+
+\section{How BNNs Use SVI}
+
+Bayesian Neural Networks (BNNs) model uncertainty in deep learning by placing probability distributions over their parameters (weights and biases). Instead of learning point estimates of weights, BNNs aim to infer a posterior distribution $p(\mathbf{w} \mid \mathcal{D})$, where $\mathbf{w}$ represents the weights and $\mathcal{D}$ is the observed data. However, exact inference is generally intractable due to the high-dimensional, nonlinear nature of neural networks. To address this, \textbf{Stochastic Variational Inference (SVI)} is used as a scalable, optimization-based approximation method.
+
+\subsection{Bayesian Inference in BNNs}
+
+Given a likelihood $p(\mathcal{D} \mid \mathbf{w})$ and a prior $p(\mathbf{w})$, the goal is to compute the posterior:
+
+\[
+p(\mathbf{w} \mid \mathcal{D}) = \frac{p(\mathcal{D} \mid \mathbf{w}) p(\mathbf{w})}{p(\mathcal{D})}
+\]
+
+Since the marginal likelihood $p(\mathcal{D}) = \int p(\mathcal{D} \mid \mathbf{w}) p(\mathbf{w}) d\mathbf{w}$ is intractable, variational inference introduces a tractable variational distribution $q_\phi(\mathbf{w})$ to approximate the posterior.
+
+\subsection{Variational Objective}
+
+SVI minimizes the Kullback–Leibler (KL) divergence between $q_\phi(\mathbf{w})$ and the true posterior $p(\mathbf{w} \mid \mathcal{D})$, which is equivalent to maximizing the Evidence Lower Bound (ELBO):
+
+\[
+\mathcal{L}(\phi) = \mathbb{E}_{q_\phi(\mathbf{w})} [\log p(\mathcal{D} \mid \mathbf{w})] - \text{KL}(q_\phi(\mathbf{w}) \,\|\, p(\mathbf{w}))
+\]
+
+This objective is optimized using stochastic gradient descent. Sampling from $q_\phi(\mathbf{w})$ and using the reparameterization trick enables gradient-based optimization even in complex models.
+
+\subsection{SVI Workflow in BNNs}
+
+In practice, SVI for BNNs involves the following components:
+
+\begin{itemize}
+    \item \textbf{Model}: Defines the prior $p(\mathbf{w})$ and the likelihood $p(\mathcal{D} \mid \mathbf{w})$, often implemented using a neural network with stochastic weights.
+    \item \textbf{Guide}: Defines the variational distribution $q_\phi(\mathbf{w})$, typically as a diagonal Gaussian whose parameters $\phi$ are optimized.
+    \item \textbf{Optimizer}: SVI minimizes the ELBO using gradient descent on minibatches of data.
+\end{itemize}
+
+\subsection{Example: Bayesian Linear Regression}
+
+Below is a minimal Pyro-style definition of a Bayesian linear model trained using SVI:
+
+\begin{verbatim}
+def model(x, y):
+    w = pyro.sample("w", dist.Normal(0., 1.))
+    b = pyro.sample("b", dist.Normal(0., 1.))
+    mean = w * x + b
+    pyro.sample("obs", dist.Normal(mean, 1.), obs=y)
+
+def guide(x, y):
+    w_loc = pyro.param("w_loc", torch.tensor(0.))
+    w_scale = pyro.param("w_scale", torch.tensor(1.), constraint=positive)
+    b_loc = pyro.param("b_loc", torch.tensor(0.))
+    b_scale = pyro.param("b_scale", torch.tensor(1.), constraint=positive)
+    pyro.sample("w", dist.Normal(w_loc, w_scale))
+    pyro.sample("b", dist.Normal(b_loc, b_scale))
+\end{verbatim}
+
+\subsection{Benefits of SVI in BNNs}
+
+SVI provides a practical and scalable method for Bayesian learning in deep models. Key benefits include:
+
+\begin{itemize}
+    \item \textbf{Scalability}: Supports minibatch training with GPUs.
+    \item \textbf{Uncertainty Estimation}: Predictive distributions include epistemic uncertainty.
+    \item \textbf{Regularization}: The KL term prevents overfitting, especially in low-data regimes.
+\end{itemize}
+
+SVI thus bridges the gap between deep learning and Bayesian modeling, allowing for robust, uncertainty-aware neural networks in high-stakes domains such as finance and healthcare.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{| l | p{10cm} |}
+\hline
+\textbf{Thing} & \textbf{Description} \\
+\hline
+Classical Bayesian & Exact posterior inference, not scalable \\
+MCMC (e.g. HMC) & Sampling-based, very accurate, slow as hell \\
+\textbf{SVI} & Variational + minibatch + gradient-based \\
+Deep Learning style & Optimizes ELBO like a loss function \\
+\hline
+\end{tabular}
+\caption{Comparison of Bayesian inference methods}
+\end{table}
+
+
+
+% Relevance to your studies
+\section{Relevance to Your Studies}
+For your work in quantum machine learning (QML) and ML for finance:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{QML}: VI’s optimization framework aligns with quantum circuit training, where variational quantum algorithms approximate complex distributions.
+    \item \textbf{Finance}: SVI’s scalability is ideal for large financial datasets (e.g., volatility forecasting), and VI’s uncertainty quantification suits credit scoring.
+    \item \textbf{Reinforcement Learning}: VI can approximate posteriors in Bayesian RL, enhancing exploration strategies.
+\end{itemize}
+Integrating VI with tools like Pyro or PennyLane (both Python-based, M1-compatible) can streamline your research.
+
+% Conclusion
+\section{Conclusion}
+Blei et al.’s paper establishes VI as a powerful, scalable alternative to MCMC for Bayesian inference. Its optimization-centric approach, grounded in KL divergence and the ELBO, enables efficient posterior approximation, with SVI extending its reach to massive datasets. For machine learning practitioners, VI offers a pragmatic tool for uncertainty quantification and model scalability, though challenges in expressiveness persist. This summary serves as a reference for your ML studies and GitHub repository, bridging theory and application.
+
+% References
+\begin{thebibliography}{1}
+\bibitem{blei2017}
+Blei, D. M., Kucukelbir, A., \& McAuliffe, J. D. (2017). Variational Inference: A Review for Statisticians. \textit{Journal of the American Statistical Association}, 112(518), 859--877. \url{https://doi.org/10.1080/01621459.2017.1285773}
+\end{thebibliography}
+
+\end{document}
